@@ -2,6 +2,7 @@ package controller
 
 import (
 	"dono/domain/giftcard/service"
+	"dono/helper"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -9,6 +10,8 @@ import (
 type IGiftCardController interface {
 	AddGiftCard(ctx *gin.Context)
 	SendGiftCard(ctx *gin.Context)
+	GetReceivedGiftCards(ctx *gin.Context)
+	UpdateGiftCardStatus(ctx *gin.Context)
 }
 
 type GiftCardController struct {
@@ -33,7 +36,7 @@ func (g *GiftCardController) AddGiftCard(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, giftCardDTO)
+	helper.GinResponse(ctx, http.StatusOK, giftCardDTO)
 }
 
 func (g *GiftCardController) SendGiftCard(ctx *gin.Context) {
@@ -49,5 +52,38 @@ func (g *GiftCardController) SendGiftCard(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nil)
+	helper.GinResponse(ctx, http.StatusOK, nil)
+}
+
+func (g *GiftCardController) GetReceivedGiftCards(ctx *gin.Context) {
+	var request GetReceivedGiftCards
+
+	if err := ctx.BindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	receivedGiftCards, err := g.service.GetReceivedGiftCards(ctx, request.ReceiverID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	helper.GinResponse(ctx, http.StatusOK, receivedGiftCards)
+}
+
+func (g *GiftCardController) UpdateGiftCardStatus(ctx *gin.Context) {
+	var request UpdateGiftCardStatus
+
+	if err := ctx.BindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	if err := g.service.UpdateGiftCardStatus(ctx, request.ID, request.Status.String()); err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	helper.GinResponse(ctx, http.StatusOK, nil)
 }

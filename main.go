@@ -33,6 +33,8 @@ func main() {
 	{
 		giftCard.POST("/add", giftCardController.AddGiftCard)
 		giftCard.POST("/send", giftCardController.SendGiftCard)
+		giftCard.POST("/received", giftCardController.GetReceivedGiftCards)
+		giftCard.POST("/update-status", giftCardController.UpdateGiftCardStatus)
 	}
 
 	appPort := os.Getenv("PORT")

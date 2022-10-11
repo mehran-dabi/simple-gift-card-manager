@@ -12,6 +12,7 @@ type IGiftCardRepository interface {
 	AddGiftCard(ctx context.Context, price int64) (giftCard *entity.GiftCard, err error)
 	SendGiftCard(ctx context.Context, senderID, receiverID, giftCardID int64) (err error)
 	GetReceivedGiftCards(ctx context.Context, receiverID int64) (giftCards []*entity.GiftCard, err error)
+	UpdateGiftCardStatus(ctx context.Context, ID int64, status string) (err error)
 }
 
 type GiftCardRepository struct {
@@ -52,7 +53,7 @@ func (g *GiftCardRepository) GetReceivedGiftCards(ctx context.Context, receiverI
 	}
 
 	for results.Next() {
-		var giftCard *entity.GiftCard
+		giftCard := new(entity.GiftCard)
 		err = results.Scan(
 			&giftCard.ID,
 			&giftCard.Price,
@@ -72,4 +73,12 @@ func (g *GiftCardRepository) GetReceivedGiftCards(ctx context.Context, receiverI
 	}
 
 	return giftCards, nil
+}
+
+func (g *GiftCardRepository) UpdateGiftCardStatus(ctx context.Context, ID int64, status string) (err error) {
+	_, err = g.db.ExecContext(ctx, UpdateGiftCardStatus, status, ID)
+	if err != nil {
+		return fmt.Errorf("failed to update gift card: %w", err)
+	}
+	return nil
 }

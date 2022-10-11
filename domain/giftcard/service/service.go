@@ -9,6 +9,8 @@ import (
 type IGiftCardService interface {
 	AddGiftCard(ctx context.Context, price int64) (giftCard *dto.GiftCard, err error)
 	SendGiftCard(ctx context.Context, sender, receiver, giftCardID int64) (err error)
+	UpdateGiftCardStatus(ctx context.Context, ID int64, status string) (err error)
+	GetReceivedGiftCards(ctx context.Context, receiverID int64) (giftCards []*dto.GiftCard, err error)
 }
 
 type GiftCardService struct {
@@ -36,4 +38,26 @@ func (g *GiftCardService) SendGiftCard(ctx context.Context, sender, receiver, gi
 	}
 
 	return nil
+}
+
+func (g *GiftCardService) UpdateGiftCardStatus(ctx context.Context, ID int64, status string) (err error) {
+	if err := g.repository.UpdateGiftCardStatus(ctx, ID, status); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GiftCardService) GetReceivedGiftCards(ctx context.Context, receiverID int64) (giftCards []*dto.GiftCard, err error) {
+	giftCardsEntities, err := g.repository.GetReceivedGiftCards(ctx, receiverID)
+	if err != nil {
+		return nil, err
+	}
+
+	giftCards = make([]*dto.GiftCard, len(giftCardsEntities))
+	for i, giftCardsEntity := range giftCardsEntities {
+		giftCards[i] = dto.GiftCardDTOFromEntity(giftCardsEntity)
+	}
+
+	return giftCards, nil
 }
