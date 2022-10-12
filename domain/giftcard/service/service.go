@@ -8,9 +8,9 @@ import (
 
 type IGiftCardService interface {
 	AddGiftCard(ctx context.Context, price int64) (giftCard *dto.GiftCard, err error)
-	SendGiftCard(ctx context.Context, sender, receiver, giftCardID int64) (err error)
+	SendGiftCard(ctx context.Context, price, sender, receiver int64) (err error)
 	UpdateGiftCardStatus(ctx context.Context, ID int64, status string) (err error)
-	GetReceivedGiftCards(ctx context.Context, receiverID int64) (giftCards []*dto.GiftCard, err error)
+	GetReceivedGiftCards(ctx context.Context, receiverID int64, statusFilter string) (giftCards []*dto.GiftCard, err error)
 }
 
 type GiftCardService struct {
@@ -32,8 +32,13 @@ func (g *GiftCardService) AddGiftCard(ctx context.Context, price int64) (giftCar
 	return giftCardDTO, nil
 }
 
-func (g *GiftCardService) SendGiftCard(ctx context.Context, sender, receiver, giftCardID int64) (err error) {
-	if err := g.repository.SendGiftCard(ctx, sender, receiver, giftCardID); err != nil {
+func (g *GiftCardService) SendGiftCard(ctx context.Context, price, sender, receiver int64) (err error) {
+	giftCardEntity, err := g.repository.AddGiftCard(ctx, price)
+	if err != nil {
+		return err
+	}
+
+	if err := g.repository.SendGiftCard(ctx, sender, receiver, giftCardEntity.ID); err != nil {
 		return err
 	}
 
@@ -48,8 +53,8 @@ func (g *GiftCardService) UpdateGiftCardStatus(ctx context.Context, ID int64, st
 	return nil
 }
 
-func (g *GiftCardService) GetReceivedGiftCards(ctx context.Context, receiverID int64) (giftCards []*dto.GiftCard, err error) {
-	giftCardsEntities, err := g.repository.GetReceivedGiftCards(ctx, receiverID)
+func (g *GiftCardService) GetReceivedGiftCards(ctx context.Context, receiverID int64, statusFilter string) (giftCards []*dto.GiftCard, err error) {
+	giftCardsEntities, err := g.repository.GetReceivedGiftCards(ctx, receiverID, statusFilter)
 	if err != nil {
 		return nil, err
 	}

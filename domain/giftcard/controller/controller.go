@@ -3,6 +3,7 @@ package controller
 import (
 	"dono/domain/giftcard/service"
 	"dono/helper"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -47,7 +48,7 @@ func (g *GiftCardController) SendGiftCard(ctx *gin.Context) {
 		return
 	}
 
-	if err := g.service.SendGiftCard(ctx, request.Sender, request.Receiver, request.GiftCardID); err != nil {
+	if err := g.service.SendGiftCard(ctx, request.Price, request.Sender, request.Receiver); err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}
@@ -58,12 +59,13 @@ func (g *GiftCardController) SendGiftCard(ctx *gin.Context) {
 func (g *GiftCardController) GetReceivedGiftCards(ctx *gin.Context) {
 	var request GetReceivedGiftCards
 
+	filter := ctx.Query("filter")
 	if err := ctx.BindJSON(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
 
-	receivedGiftCards, err := g.service.GetReceivedGiftCards(ctx, request.ReceiverID)
+	receivedGiftCards, err := g.service.GetReceivedGiftCards(ctx, request.ReceiverID, filter)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
@@ -80,8 +82,13 @@ func (g *GiftCardController) UpdateGiftCardStatus(ctx *gin.Context) {
 		return
 	}
 
+	if !request.Status.Verify() {
+		helper.GinErrResponse(ctx, http.StatusBadRequest, fmt.Errorf("status is not valid"))
+		return
+	}
+
 	if err := g.service.UpdateGiftCardStatus(ctx, request.ID, request.Status.String()); err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		helper.GinErrResponse(ctx, http.StatusInternalServerError, err)
 		return
 	}
 

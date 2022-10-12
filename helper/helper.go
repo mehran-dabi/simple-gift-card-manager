@@ -2,15 +2,24 @@ package helper
 
 import "github.com/gin-gonic/gin"
 
-func GinResponse(ctx *gin.Context, code int, body interface{}) {
-	type response struct {
-		Status int         `json:"status"`
-		Body   interface{} `json:"body"`
-	}
+type response struct {
+	Status bool        `json:"status"`
+	Body   interface{} `json:"body"`
+}
 
+func GinResponse(ctx *gin.Context, code int, body interface{}) {
 	resp := response{
-		Status: code,
+		Status: true,
 		Body:   body,
 	}
+	ctx.JSON(code, resp)
+}
+
+func GinErrResponse(ctx *gin.Context, code int, err error) {
+	resp := response{
+		Status: false,
+		Body:   err.Error(),
+	}
+
 	ctx.JSON(code, resp)
 }

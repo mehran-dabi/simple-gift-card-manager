@@ -11,7 +11,7 @@ import (
 type IGiftCardRepository interface {
 	AddGiftCard(ctx context.Context, price int64) (giftCard *entity.GiftCard, err error)
 	SendGiftCard(ctx context.Context, senderID, receiverID, giftCardID int64) (err error)
-	GetReceivedGiftCards(ctx context.Context, receiverID int64) (giftCards []*entity.GiftCard, err error)
+	GetReceivedGiftCards(ctx context.Context, receiverID int64, statusFilter string) (giftCards []*entity.GiftCard, err error)
 	UpdateGiftCardStatus(ctx context.Context, ID int64, status string) (err error)
 }
 
@@ -46,8 +46,13 @@ func (g *GiftCardRepository) SendGiftCard(ctx context.Context, senderID, receive
 	return nil
 }
 
-func (g *GiftCardRepository) GetReceivedGiftCards(ctx context.Context, receiverID int64) (giftCards []*entity.GiftCard, err error) {
-	results, err := g.db.QueryContext(ctx, GetReceivedGiftCards, receiverID)
+func (g *GiftCardRepository) GetReceivedGiftCards(ctx context.Context, receiverID int64, statusFilter string) (giftCards []*entity.GiftCard, err error) {
+	var results *sql.Rows
+	if statusFilter != "" {
+		results, err = g.db.QueryContext(ctx, GetReceivedGiftCardsWithStatusFilter, receiverID, statusFilter)
+	} else {
+		results, err = g.db.QueryContext(ctx, GetReceivedGiftCards, receiverID)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get received gift cards: %w", err)
 	}

@@ -5,9 +5,9 @@ type AddGiftCard struct {
 }
 
 type SendGiftCard struct {
-	Sender     int64 `json:"sender"`
-	Receiver   int64 `json:"receiver"`
-	GiftCardID int64 `json:"gift_card_id"`
+	Sender   int64 `json:"sender"`
+	Receiver int64 `json:"receiver"`
+	Price    int64 `json:"price"`
 }
 
 type GiftCardStatus string
@@ -28,7 +28,7 @@ func (g GiftCardStatus) Verify() bool {
 }
 
 func (g GiftCardStatus) String() string {
-	return g.String()
+	return string(g)
 }
 
 type UpdateGiftCardStatus struct {
