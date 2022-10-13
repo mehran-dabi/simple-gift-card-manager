@@ -1,31 +1,37 @@
 package main
 
 import (
+	"database/sql"
+	"dono/config"
 	"dono/domain/giftcard/controller"
+	"dono/domain/giftcard/repository"
 	"dono/domain/giftcard/service"
 	"dono/infrastructure"
-	"github.com/gin-gonic/gin"
 	"log"
-	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	dbHost := os.Getenv("DB_HOST")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbUser := os.Getenv("DB_USER")
-	dbName := os.Getenv("DB_NAME")
-	dbPort := os.Getenv("DB_PORT")
+	configs := config.Init()
 
-	repositories, err := infrastructure.NewRepository(dbUser, dbPassword, dbHost, dbPort, dbName)
+	db, err := infrastructure.NewRepository(
+		configs.Database.User,
+		configs.Database.Pass,
+		configs.Database.Host,
+		configs.Database.Port,
+		configs.Database.Name,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer func(repositories *infrastructure.Repositories) {
-		_ = repositories.Close()
-	}(repositories)
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(db)
 
-	giftCardService := service.NewGiftCardService(repositories.GiftCard)
+	giftCardRepo := repository.NewGiftCardRepository(db)
+	giftCardService := service.NewGiftCardService(giftCardRepo)
 	giftCardController := controller.NewGiftCardController(giftCardService)
 
 	r := gin.Default()
@@ -37,7 +43,7 @@ func main() {
 		giftCard.POST("/update-status", giftCardController.UpdateGiftCardStatus)
 	}
 
-	appPort := os.Getenv("PORT")
+	appPort := configs.Server.Port
 	if appPort == "" {
 		appPort = "8888"
 	}

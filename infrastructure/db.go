@@ -2,27 +2,23 @@ package infrastructure
 
 import (
 	"database/sql"
-	giftCardRepository "dono/domain/giftcard/repository"
 	"fmt"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type Repositories struct {
-	GiftCard giftCardRepository.IGiftCardRepository
-	db       *sql.DB
+	db *sql.DB
 }
 
-func NewRepository(dbUser, dbPassword, dbHost, dbPort, dbName string) (*Repositories, error) {
-	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
+func NewRepository(dbUser, dbPassword, dbHost, dbPort, dbName string) (*sql.DB, error) {
+	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?multiStatements=true", dbUser, dbPassword, dbHost, dbPort, dbName)
 	db, err := sql.Open("mysql", DBURL)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Repositories{
-		GiftCard: giftCardRepository.NewGiftCardRepository(db),
-		db:       db,
-	}, nil
+	return db, nil
 }
 
 func (s *Repositories) Close() error {
