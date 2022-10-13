@@ -1,6 +1,10 @@
 package helper
 
-import "github.com/gin-gonic/gin"
+import (
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
 
 type response struct {
 	Status bool        `json:"status"`
@@ -22,4 +26,9 @@ func GinErrResponse(ctx *gin.Context, code int, err error) {
 	}
 
 	ctx.JSON(code, resp)
+}
+
+func ReplaceEscapeCharacter(s string) string {
+	re := strings.NewReplacer("?", "\\?", "(", "\\(", ")", "\\)", ".", "\\.")
+	return re.Replace(s)
 }
