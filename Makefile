@@ -14,6 +14,6 @@ check: format format-check ## Linting and static analysis
 	fi
 
 	@if test ! -e ./bin/golangci-lint; then \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.45.0; \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.50.0; \
 	fi
 	@./bin/golangci-lint run --timeout 180s
