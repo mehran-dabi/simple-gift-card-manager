@@ -1,6 +1,6 @@
-# DONO Code Challenge
+# Simple Gift Card Management Service
 
-This repository is for the interview code challenge for DONO company.
+This is a simple gift card management service.
 
 ## Structure
 The Domain Driven Design pattern has been used for the implementation.
